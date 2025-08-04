@@ -1,0 +1,465 @@
+// Variables
+$primary-color: #2563eb;
+$secondary-color: #f1f5f9;
+$accent-color: #10b981;
+$text-color: #1f2937;
+$light-text: #6b7280;
+$border-color: #e5e7eb;
+$shadow-color: rgba(0, 0, 0, 0.1);
+$gradient-start: #3b82f6;
+$gradient-end: #1d4ed8;
+
+// Mixins
+@mixin card-shadow {
+    box-shadow: 0 4px 6px -1px $shadow-color, 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@mixin transition($property: all, $duration: 0.3s) {
+    transition: $property $duration ease;
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Base styles
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: $text-color;
+    background-color: #f8fafc;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+// Header
+header {
+    background: linear-gradient(135deg, $gradient-start, $gradient-end);
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+}
+
+// Main content
+main {
+    padding: 2rem 0;
+}
+
+// Calculator section
+.calculator-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.calculator-card,
+.result-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    @include card-shadow;
+    
+    h2, h3 {
+        margin-bottom: 1.5rem;
+        color: $text-color;
+    }
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+    
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: $text-color;
+    }
+    
+    input, select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid $border-color;
+        border-radius: 8px;
+        font-size: 1rem;
+        @include transition();
+        
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+    }
+}
+
+.discount-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid $border-color;
+    
+    h3 {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+}
+
+.checkbox-group {
+    margin-bottom: 1rem;
+    
+    label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.5rem;
+            accent-color: $primary-color;
+        }
+        
+        span {
+            font-weight: normal;
+        }
+    }
+}
+
+.calculate-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, $gradient-start, $gradient-end);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    @include transition();
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+// Result card
+.result-card {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    @include transition();
+    
+    &.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid $border-color;
+    
+    &:last-child {
+        border-bottom: none;
+    }
+    
+    &.total {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: $primary-color;
+        border-top: 2px solid $primary-color;
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+}
+
+.save-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: $accent-color;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 1rem;
+    @include transition();
+    
+    &:hover {
+        background: darken($accent-color, 10%);
+    }
+}
+
+// Saved vehicles section
+.saved-vehicles {
+    margin-bottom: 3rem;
+    
+    h2 {
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: $text-color;
+    }
+}
+
+.vehicle-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.vehicle-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    @include card-shadow;
+    @include transition();
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .vehicle-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: $text-color;
+    }
+    
+    .vehicle-details {
+        color: $light-text;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .vehicle-taxes {
+        font-size: 0.9rem;
+        
+        .tax-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .total-tax {
+            font-weight: 600;
+            color: $primary-color;
+            border-top: 1px solid $border-color;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+    }
+    
+    .vehicle-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        
+        button {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            @include transition();
+            
+            &.load-btn {
+                background: $primary-color;
+                color: white;
+                
+                &:hover {
+                    background: darken($primary-color, 10%);
+                }
+            }
+            
+            &.delete-btn {
+                background: #ef4444;
+                color: white;
+                
+                &:hover {
+                    background: darken(#ef4444, 10%);
+                }
+            }
+        }
+    }
+}
+
+// Tax info section
+.tax-info {
+    h2 {
+        margin-bottom: 2rem;
+        text-align: center;
+        color: $text-color;
+    }
+}
+
+.info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    @include card-shadow;
+    
+    h3 {
+        color: $primary-color;
+        margin-bottom: 1rem;
+    }
+    
+    p {
+        color: $light-text;
+        margin-bottom: 1rem;
+    }
+    
+    ul {
+        list-style: none;
+        
+        li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: $light-text;
+            
+            &::before {
+                content: "•";
+                color: $primary-color;
+                position: absolute;
+                left: 0;
+            }
+        }
+    }
+}
+
+// Footer
+footer {
+    background: $text-color;
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    
+    p {
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+        
+        &:last-child {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .calculator-card,
+    .result-card {
+        padding: 1.5rem;
+    }
+    
+    .info-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+// Animations
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+// Loading state
+.loading {
+    position: relative;
+    
+    &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid $primary-color;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+// Empty state
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: $light-text;
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    h3 {
+        margin-bottom: 0.5rem;
+        color: $text-color;
+    }
+} 

@@ -1,0 +1,32 @@
+{
+  "name": "tax-calculator-kr",
+  "version": "1.0.0",
+  "description": "한국 세금 계산기 - 자동차세, 부동산세, 소득세 등 각종 세금 계산",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "build": "echo 'No build step required'",
+    "test": "echo 'No tests specified'",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "자동차세",
+    "개별소비세",
+    "취득세",
+    "보유세",
+    "세금계산기",
+    "car",
+    "tax",
+    "calculator"
+  ],
+  "author": "Car Tax Calculator",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JJapShe/tax-calculator-kr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JJapShe/tax-calculator-kr/issues"
+  },
+  "homepage": "https://JJapShe.github.io/tax-calculator-kr"
+} 

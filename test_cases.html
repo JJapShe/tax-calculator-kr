@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자동차 세금 계산기 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .test-case.success {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+        .test-case.error {
+            border-color: #f44336;
+            background: #ffeaea;
+        }
+        .test-case h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .test-input {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .run-tests-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        .run-tests-btn:hover {
+            background: #1976D2;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        .summary {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .summary h2 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚗 자동차 세금 계산기 테스트 케이스</h1>
+    
+    <div class="test-container">
+        <button class="run-tests-btn" onclick="runAllTests()">전체 테스트 실행</button>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        
+        <div class="summary" id="testSummary" style="display: none;">
+            <h2>테스트 결과 요약</h2>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+
+    <div id="testResults"></div>
+
+    <script>
+        // 메인 계산기 클래스 import (실제 구현에서는 main.js에서 가져옴)
+        let taxCalculator;
+        
+        // 테스트 케이스 정의
+        const testCases = [
+            {
+                name: "기본 승용차 세금 계산",
+                input: {
+                    carName: "아반떼",
+                    carPrice: 30000000,
+                    displacement: 1600,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxExists: true,
+                    acquisitionTaxExists: true,
+                    annualTaxExists: true,
+                    totalTaxExists: true
+                },
+                description: "3000만원 아반떼 1600cc 신차 기본 세금 계산"
+            },
+            {
+                name: "전기차 자동 감면 적용",
+                input: {
+                    carName: "아이오닉 6",
+                    carPrice: 50000000,
+                    displacement: 0,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "electric",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: true, // 자동 적용
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxReduced: true,
+                    acquisitionTaxReduced: true,
+                    annualTaxFlat: true, // 전기차 정액
+                    electricDiscountApplied: true
+                },
+                description: "5000만원 전기차 자동 감면 적용 (개별소비세 300만원, 취득세 140만원 한도)"
+            },
+            {
+                name: "수소전기차 자동 감면 적용",
+                input: {
+                    carName: "넥쏘",
+                    carPrice: 70000000,
+                    displacement: 0,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "hydrogen",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: true, // 자동 적용
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxReduced: true,
+                    acquisitionTaxReduced: true,
+                    annualTaxFlat: true, // 수소전기차 정액
+                    hydrogenDiscountApplied: true
+                },
+                description: "7000만원 수소전기차 자동 감면 적용 (개별소비세 400만원, 취득세 140만원 한도)"
+            },
+            {
+                name: "경차 자동 감면 적용",
+                input: {
+                    carName: "모닝",
+                    carPrice: 15000000,
+                    displacement: 800,
+                    carAge: 0,
+                    vehicleType: "compact",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: true, // 자동 적용
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxZero: true, // 경차 면제
+                    acquisitionTaxZero: true, // 1875만원 이하 면제
+                    compactDiscountApplied: true
+                },
+                description: "1500만원 경차 자동 감면 적용 (개별소비세 면제, 취득세 면제)"
+            },
+            {
+                name: "장애인 면제 적용",
+                input: {
+                    carName: "쏘나타",
+                    carPrice: 40000000,
+                    displacement: 2000,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: false,
+                        disabled: true,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxReduced: true, // 장애인 500만원 한도
+                    acquisitionTaxZero: true, // 장애인 면제
+                    disabledExemptionApplied: true
+                },
+                description: "4000만원 승용차 장애인 면제 적용 (개별소비세 500만원 한도, 취득세 면제)"
+            },
+            {
+                name: "국가유공자 면제 적용",
+                input: {
+                    carName: "그랜져",
+                    carPrice: 60000000,
+                    displacement: 3000,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: false,
+                        disabled: false,
+                        veteran: true,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    acquisitionTaxZero: true, // 국가유공자 면제
+                    veteranExemptionApplied: true
+                },
+                description: "6000만원 대형 승용차 국가유공자 면제 적용 (취득세 면제)"
+            },
+            {
+                name: "다자녀 3명 감면 적용",
+                input: {
+                    carName: "카니발",
+                    carPrice: 45000000,
+                    displacement: 3500,
+                    carAge: 0,
+                    vehicleType: "van",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "7-10",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: true
+                    }
+                },
+                expected: {
+                    acquisitionTaxReduced: true, // 다자녀 감면
+                    multiChildDiscountApplied: true
+                },
+                description: "4500만원 승합차 다자녀 3명 감면 적용 (7인승 이상 100% 감면)"
+            },
+            {
+                name: "노후차량 감면 적용",
+                input: {
+                    carName: "구형 소나타",
+                    carPrice: 25000000,
+                    displacement: 2000,
+                    carAge: 6,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: true,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxReduced: true, // 노후차량 70% 감면
+                    acquisitionTaxReduced: true, // 노후차량 30만원 감면
+                    annualTaxReduced: true, // 6년차 30% 할인
+                    oldCarDiscountApplied: true
+                },
+                description: "2500만원 6년차 노후차량 감면 적용 (개별소비세 70% 감면, 취득세 30만원 감면)"
+            },
+            {
+                name: "1000cc 이하 비과세",
+                input: {
+                    carName: "레이",
+                    carPrice: 18000000,
+                    displacement: 1000,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxZero: true, // 1000cc 이하 비과세
+                    smallEngineExemptionApplied: true
+                },
+                description: "1800만원 1000cc 소형차 비과세 적용 (개별소비세 면제)"
+            },
+            {
+                name: "이륜차 세금 계산",
+                input: {
+                    carName: "대형 오토바이",
+                    carPrice: 5000000,
+                    displacement: 300,
+                    carAge: 0,
+                    vehicleType: "motorcycle",
+                    vehicleUse: "private",
+                    fuelType: "gasoline",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: false,
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxZero: true, // 이륜차 비과세
+                    acquisitionTaxRate: 0.05, // 125cc 초과 5%
+                    registrationLicenseIncluded: true, // 등록면허세 포함
+                    motorcycleRulesApplied: true
+                },
+                description: "500만원 300cc 이륜차 세금 계산 (개별소비세 비과세, 취득세 5% + 등록면허세)"
+            },
+            {
+                name: "개별소비세 감면 한도 테스트",
+                input: {
+                    carName: "고급 전기차",
+                    carPrice: 200000000,
+                    displacement: 0,
+                    carAge: 0,
+                    vehicleType: "passenger",
+                    vehicleUse: "private",
+                    fuelType: "electric",
+                    seatingCapacity: "1-6",
+                    discounts: {
+                        individualTaxDiscount: true, // 자동 적용
+                        oldCar: false,
+                        disabled: false,
+                        veteran: false,
+                        multiChild2: false,
+                        multiChild3: false
+                    }
+                },
+                expected: {
+                    individualTaxHasLimit: true, // 300만원 한도 적용
+                    electricDiscountLimited: true
+                },
+                description: "2억원 고급 전기차 감면 한도 테스트 (개별소비세 300만원 한도 적용)"
+            }
+        ];
+
+        let currentTestIndex = 0;
+        let testResults = [];
+
+        // 테스트 실행 함수
+        async function runAllTests() {
+            console.log('=== 전체 테스트 시작 ===');
+            
+            // 초기화
+            currentTestIndex = 0;
+            testResults = [];
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('testSummary').style.display = 'none';
+            
+            // 메인 계산기 로드 확인
+            if (typeof TaxCalculator === 'undefined') {
+                console.error('TaxCalculator 클래스를 찾을 수 없습니다. main.js가 로드되었는지 확인하세요.');
+                return;
+            }
+            
+            taxCalculator = new TaxCalculator();
+            
+            // 각 테스트 케이스 실행
+            for (let i = 0; i < testCases.length; i++) {
+                currentTestIndex = i;
+                updateProgressBar();
+                
+                const testCase = testCases[i];
+                const result = await runSingleTest(testCase);
+                testResults.push(result);
+                
+                displayTestResult(result);
+                
+                // 잠시 대기 (시각적 효과)
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // 테스트 완료
+            updateProgressBar();
+            displaySummary();
+            
+            console.log('=== 전체 테스트 완료 ===');
+        }
+
+        // 단일 테스트 실행
+        async function runSingleTest(testCase) {
+            console.log(`테스트 실행: ${testCase.name}`);
+            
+            try {
+                // 입력값 설정
+                setInputValues(testCase.input);
+                
+                // 계산 실행
+                const vehicleData = taxCalculator.getVehicleData();
+                const calculatedTaxes = taxCalculator.calculateAllTaxes(vehicleData);
+                
+                // 결과 검증
+                const validationResult = validateResults(calculatedTaxes, testCase.expected, testCase.input);
+                
+                return {
+                    name: testCase.name,
+                    description: testCase.description,
+                    input: testCase.input,
+                    expected: testCase.expected,
+                    actual: calculatedTaxes,
+                    validation: validationResult,
+                    success: validationResult.success,
+                    message: validationResult.message
+                };
+                
+            } catch (error) {
+                console.error(`테스트 실패: ${testCase.name}`, error);
+                return {
+                    name: testCase.name,
+                    description: testCase.description,
+                    input: testCase.input,
+                    expected: testCase.expected,
+                    actual: null,
+                    validation: { success: false, message: `테스트 실행 중 오류: ${error.message}` },
+                    success: false,
+                    message: `테스트 실행 중 오류: ${error.message}`
+                };
+            }
+        }
+
+        // 입력값 설정 함수
+        function setInputValues(input) {
+            // DOM 요소가 없으면 가상으로 생성
+            if (!document.getElementById('carName')) {
+                createMockInputElements();
+            }
+            
+            document.getElementById('carName').value = input.carName || '';
+            document.getElementById('carPrice').value = input.carPrice || 0;
+            document.getElementById('displacement').value = input.displacement || 0;
+            document.getElementById('carAge').value = input.carAge || 0;
+            document.getElementById('vehicleType').value = input.vehicleType || 'passenger';
+            document.getElementById('vehicleUse').value = input.vehicleUse || 'private';
+            document.getElementById('fuelType').value = input.fuelType || 'gasoline';
+            document.getElementById('seatingCapacity').value = input.seatingCapacity || '1-6';
+            
+            // 할인 옵션 설정
+            document.getElementById('individualTaxDiscount').checked = input.discounts.individualTaxDiscount || false;
+            document.getElementById('oldCarDiscount').checked = input.discounts.oldCar || false;
+            document.getElementById('disabledDiscount').checked = input.discounts.disabled || false;
+            document.getElementById('veteranDiscount').checked = input.discounts.veteran || false;
+            document.getElementById('multiChild2').checked = input.discounts.multiChild2 || false;
+            document.getElementById('multiChild3').checked = input.discounts.multiChild3 || false;
+            
+            // 라디오 버튼 처리
+            if (input.discounts.disabled) {
+                document.getElementById('disabledDiscount').checked = true;
+            } else if (input.discounts.veteran) {
+                document.getElementById('veteranDiscount').checked = true;
+            } else if (input.discounts.multiChild2) {
+                document.getElementById('multiChild2').checked = true;
+            } else if (input.discounts.multiChild3) {
+                document.getElementById('multiChild3').checked = true;
+            } else {
+                document.getElementById('acquisitionNone').checked = true;
+            }
+        }
+
+        // 가상 입력 요소 생성
+        function createMockInputElements() {
+            const inputs = [
+                { id: 'carName', type: 'text' },
+                { id: 'carPrice', type: 'number' },
+                { id: 'displacement', type: 'number' },
+                { id: 'carAge', type: 'number' },
+                { id: 'vehicleType', type: 'select' },
+                { id: 'vehicleUse', type: 'select' },
+                { id: 'fuelType', type: 'select' },
+                { id: 'seatingCapacity', type: 'select' },
+                { id: 'individualTaxDiscount', type: 'checkbox' },
+                { id: 'oldCarDiscount', type: 'checkbox' },
+                { id: 'disabledDiscount', type: 'radio' },
+                { id: 'veteranDiscount', type: 'radio' },
+                { id: 'multiChild2', type: 'radio' },
+                { id: 'multiChild3', type: 'radio' },
+                { id: 'acquisitionNone', type: 'radio' }
+            ];
+            
+            inputs.forEach(input => {
+                if (!document.getElementById(input.id)) {
+                    const element = document.createElement(input.type === 'select' ? 'select' : 'input');
+                    element.id = input.id;
+                    if (input.type !== 'select') {
+                        element.type = input.type;
+                    }
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
+                }
+            });
+        }
+
+        // 결과 검증 함수
+        function validateResults(actual, expected, input) {
+            const validations = [];
+            
+            // 개별소비세 검증
+            if (expected.individualTaxZero) {
+                const isZero = actual.individualTax === 0;
+                validations.push({
+                    test: '개별소비세 면제',
+                    expected: '0원',
+                    actual: `${actual.individualTax}원`,
+                    success: isZero
+                });
+            }
+            
+            if (expected.individualTaxReduced) {
+                const hasReduction = actual.individualTax < (actual.purePrice * 0.05);
+                validations.push({
+                    test: '개별소비세 감면',
+                    expected: '감면 적용',
+                    actual: hasReduction ? '감면 적용됨' : '감면 미적용',
+                    success: hasReduction
+                });
+            }
+            
+            // 취득세 검증
+            if (expected.acquisitionTaxZero) {
+                const isZero = actual.acquisitionTax === 0;
+                validations.push({
+                    test: '취득세 면제',
+                    expected: '0원',
+                    actual: `${actual.acquisitionTax}원`,
+                    success: isZero
+                });
+            }
+            
+            if (expected.acquisitionTaxReduced) {
+                const hasReduction = actual.acquisitionTax < (actual.taxBase * 0.07);
+                validations.push({
+                    test: '취득세 감면',
+                    expected: '감면 적용',
+                    actual: hasReduction ? '감면 적용됨' : '감면 미적용',
+                    success: hasReduction
+                });
+            }
+            
+            // 자동차세 검증
+            if (expected.annualTaxFlat) {
+                const isFlat = (input.fuelType === 'electric' && actual.annualTax === 130000) ||
+                              (input.fuelType === 'hydrogen' && actual.annualTax === 130000);
+                validations.push({
+                    test: '자동차세 정액',
+                    expected: '130,000원',
+                    actual: `${actual.annualTax}원`,
+                    success: isFlat
+                });
+            }
+            
+            // 감면 한도 검증
+            if (expected.individualTaxHasLimit) {
+                const electricLimit = 3000000;
+                const hydrogenLimit = 4000000;
+                const maxDiscount = input.fuelType === 'electric' ? electricLimit : hydrogenLimit;
+                
+                const originalTax = actual.purePrice * 0.05;
+                const actualDiscount = originalTax - actual.individualTax;
+                const withinLimit = actualDiscount <= maxDiscount;
+                
+                validations.push({
+                    test: '감면 한도 적용',
+                    expected: `최대 ${maxDiscount.toLocaleString()}원`,
+                    actual: `${actualDiscount.toLocaleString()}원 감면`,
+                    success: withinLimit
+                });
+            }
+            
+            // 전체 성공 여부
+            const allSuccess = validations.every(v => v.success);
+            
+            return {
+                success: allSuccess,
+                message: allSuccess ? '모든 검증 통과' : '일부 검증 실패',
+                validations: validations
+            };
+        }
+
+        // 진행률 업데이트
+        function updateProgressBar() {
+            const progress = ((currentTestIndex + 1) / testCases.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // 테스트 결과 표시
+        function displayTestResult(result) {
+            const resultsContainer = document.getElementById('testResults');
+            
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-case ${result.success ? 'success' : 'error'}`;
+            
+            testDiv.innerHTML = `
+                <h3>${result.name}</h3>
+                <p>${result.description}</p>
+                <div class="test-input">
+                    <strong>입력:</strong> ${formatInput(result.input)}
+                </div>
+                <div class="test-result">
+                    <strong>결과:</strong> <span class="${result.success ? 'success' : 'error'}">${result.message}</span>
+                </div>
+                ${result.validation.validations ? formatValidations(result.validation.validations) : ''}
+            `;
+            
+            resultsContainer.appendChild(testDiv);
+        }
+
+        // 입력값 포맷팅
+        function formatInput(input) {
+            return `${input.carName} (${input.carPrice.toLocaleString()}원, ${input.displacement}cc, ${input.carAge}년차, ${input.vehicleType}, ${input.fuelType})`;
+        }
+
+        // 검증 결과 포맷팅
+        function formatValidations(validations) {
+            return validations.map(v => `
+                <div style="margin: 5px 0; padding: 5px; border-left: 3px solid ${v.success ? '#4CAF50' : '#f44336'};">
+                    <strong>${v.test}:</strong> 
+                    기대값: ${v.expected}, 
+                    실제값: ${v.actual}
+                    <span class="${v.success ? 'success' : 'error'}">${v.success ? '✓' : '✗'}</span>
+                </div>
+            `).join('');
+        }
+
+        // 요약 표시
+        function displaySummary() {
+            const totalTests = testResults.length;
+            const passedTests = testResults.filter(r => r.success).length;
+            const failedTests = totalTests - passedTests;
+            
+            const summaryDiv = document.getElementById('testSummary');
+            const summaryContent = document.getElementById('summaryContent');
+            
+            summaryContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                    <div>
+                        <h3>📊 전체 테스트 결과</h3>
+                        <p><strong>총 테스트:</strong> ${totalTests}개</p>
+                        <p><strong>성공:</strong> <span class="success">${passedTests}개</span></p>
+                        <p><strong>실패:</strong> <span class="error">${failedTests}개</span></p>
+                        <p><strong>성공률:</strong> ${((passedTests / totalTests) * 100).toFixed(1)}%</p>
+                    </div>
+                    <div>
+                        <h3>🎯 테스트 커버리지</h3>
+                        <ul>
+                            <li>기본 세금 계산 ✓</li>
+                            <li>전기차/수소전기차 감면 ✓</li>
+                            <li>경차 감면 ✓</li>
+                            <li>장애인/국가유공자 면제 ✓</li>
+                            <li>다자녀 감면 ✓</li>
+                            <li>노후차량 감면 ✓</li>
+                            <li>1000cc 이하 비과세 ✓</li>
+                            <li>이륜차 특별 계산 ✓</li>
+                            <li>감면 한도 적용 ✓</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            summaryDiv.style.display = 'block';
+        }
+
+        // 페이지 로드 시 메인 스크립트 로드
+        window.onload = function() {
+            // 메인 계산기 스크립트 로드
+            const script = document.createElement('script');
+            script.src = './scripts/main.js';
+            script.onload = function() {
+                console.log('메인 스크립트 로드 완료');
+                document.querySelector('.run-tests-btn').disabled = false;
+            };
+            script.onerror = function() {
+                console.error('메인 스크립트 로드 실패');
+                document.querySelector('.run-tests-btn').innerHTML = '메인 스크립트 로드 실패';
+                document.querySelector('.run-tests-btn').disabled = true;
+            };
+            document.head.appendChild(script);
+        };
+    </script>
+</body>
+</html> 

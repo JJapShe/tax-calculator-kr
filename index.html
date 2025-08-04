@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국 세금 계산기 - 자동차세, 부동산세, 소득세</title>
+    <meta name="description" content="한국의 각종 세금을 간편하게 계산하세요. 자동차세, 부동산 취득세, 소득세 등 다양한 세금 계산기를 제공합니다.">
+    <meta name="keywords" content="세금계산기, 자동차세, 부동산세, 소득세, 취득세, 개별소비세, 보유세, 한국세금">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles/main.css">
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <h1>💰 한국 세금 계산기</h1>
+                <p>각종 세금을 간편하게 계산하세요</p>
+            </div>
+            
+            <!-- 내비게이션 바 -->
+            <nav class="tax-navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-calculator="car">
+                            🚗 자동차 세금
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link disabled" data-calculator="real-estate">
+                            🏠 부동산 세금
+                            <span class="coming-soon">준비중</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link disabled" data-calculator="income">
+                            💼 소득세
+                            <span class="coming-soon">준비중</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link disabled" data-calculator="gift">
+                            🎁 증여·상속세
+                            <span class="coming-soon">준비중</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- 계산기 섹션 -->
+            <section class="calculator-section">
+                <div class="calculator-card">
+                    <h2>🚗 자동차 세금 계산</h2>
+                    
+                    <!-- 차량 정보 입력 -->
+                    <div class="input-group">
+                        <label for="carName">차량명</label>
+                        <input type="text" id="carName" placeholder="예: 아반떼 HEV">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="carPrice">차량 가격 (기준)</label>
+                        <input type="number" id="carPrice" placeholder="차량 가격 (원)" min="0" step="1000">
+                        <div class="calculated-price" id="calculatedPriceDisplay" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="displacement">배기량</label>
+                        <input type="number" id="displacement" placeholder="배기량 (cc)" min="0" value="1998">
+                        <small id="displacementHint" class="form-text text-muted" style="display: none;">전기차/수소전기차는 배기량이 자동으로 설정됩니다.</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="carAge">차령</label>
+                        <input type="number" id="carAge" placeholder="차령 (년)" min="0" max="30" value="0">
+                    </div>
+
+                                        <div class="input-group">
+                        <label for="vehicleType">차량 형태</label>
+                        <select id="vehicleType">
+                            <option value="compact">경차</option>
+                            <option value="passenger" selected>승용차</option>
+                            <option value="van">승합차</option>
+                            <option value="truck">화물차</option>
+                            <option value="motorcycle">이륜차</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="vehicleUse">차량 용도</label>
+                        <select id="vehicleUse">
+                            <option value="private">비영업용</option>
+                            <option value="business">영업용</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="fuelType">연료 타입</label>
+                        <select id="fuelType">
+                            <option value="gasoline">가솔린</option>
+                            <option value="diesel">디젤</option>
+                            <option value="hybrid">하이브리드</option>
+                            <option value="electric">전기차</option>
+                            <option value="hydrogen">수소전기차</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="seatingCapacity">승차정원</label>
+                        <select id="seatingCapacity">
+                            <option value="1-6">6인승 이하</option>
+                            <option value="7-10">7~10인승</option>
+                            <option value="11-15">11~15인승</option>
+                            <option value="16+">16인승 이상</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="region">거주지역</label>
+                        <select id="region">
+                            <option value="seoul">서울특별시</option>
+                            <option value="busan">부산광역시</option>
+                            <option value="daegu">대구광역시</option>
+                            <option value="incheon">인천광역시</option>
+                            <option value="gwangju">광주광역시</option>
+                            <option value="daejeon">대전광역시</option>
+                            <option value="ulsan">울산광역시</option>
+                            <option value="sejong">세종특별자치시</option>
+                            <option value="gyeonggi">경기도</option>
+                            <option value="gangwon">강원도</option>
+                            <option value="chungbuk">충청북도</option>
+                            <option value="chungnam">충청남도</option>
+                            <option value="jeonbuk">전라북도</option>
+                            <option value="jeonnam">전라남도</option>
+                            <option value="gyeongbuk">경상북도</option>
+                            <option value="gyeongnam">경상남도</option>
+                            <option value="jeju">제주특별자치도</option>
+                        </select>
+                    </div>
+
+                    <!-- 감면 옵션 -->
+                    <div class="discount-section">
+                        <h3>감면 혜택</h3>
+                        
+
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="individualTaxDiscount">
+                                <span>개별소비세 감면 (5% → 3.5%, ~25년 12월 31일)</span>
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="oldCarDiscount">
+                                <span>노후차량 감면</span>
+                            </label>
+                        </div>
+
+
+
+                        <div class="discount-section-group">
+                            <h4>취득세 할인 대상</h4>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="radio" name="acquisitionDiscount" id="acquisitionNone" checked>
+                                    <span>해당 없음</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="radio" name="acquisitionDiscount" id="disabledDiscount">
+                                    <span>장애인 (취득세 면제)</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="radio" name="acquisitionDiscount" id="veteranDiscount">
+                                    <span>국가유공자 1~3급 (취득세 면제)</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="radio" name="acquisitionDiscount" id="multiChild2">
+                                    <span>다자녀 2명</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="radio" name="acquisitionDiscount" id="multiChild3">
+                                    <span>다자녀 3명 이상</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="calculate-btn" onclick="calculateTax()">계산하기</button>
+                </div>
+
+                <!-- 결과 표시 -->
+                <div class="result-card" id="resultCard">
+                    <h3>계산 결과</h3>
+                    
+                    <!-- 구입가격 내 포함된 세금 -->
+                    <div class="result-section">
+                        <h4>구입가격 내 포함된 세금</h4>
+                        <div class="result-item">
+                            <span id="individualTaxLabel">개별소비세 (5%)</span>
+                            <span id="individualTax">0원</span>
+                        </div>
+                        <div class="result-item">
+                            <span>교육세 (개별소비세의 30%)</span>
+                            <span id="educationTax">0원</span>
+                        </div>
+                        <div class="result-item">
+                            <span>부가가치세 (10%)</span>
+                            <span id="vatTax">0원</span>
+                        </div>
+                    </div>
+
+                    <!-- 순수 차량 가격 -->
+                    <div class="result-item pure-price">
+                        <span>순수 차량 가격 (세금 제외)</span>
+                        <span id="purePrice">0원</span>
+                    </div>
+
+                    <!-- 과세표준 -->
+                    <div class="result-item tax-base">
+                        <span>과세표준 (= 계산된 최종 차량가격)</span>
+                        <span id="taxBase">0원</span>
+                    </div>
+
+                    <!-- 취득세 -->
+                    <div class="result-section">
+                        <h4>취득세</h4>
+                        <div class="result-item">
+                            <span id="acquisitionTaxLabel">취득세</span>
+                            <span id="acquisitionTax">0원</span>
+                        </div>
+                    </div>
+
+                    <!-- 자동차세 -->
+                    <div class="result-section">
+                        <h4>자동차세 (연간)</h4>
+                        <div class="result-item">
+                            <span id="annualTaxLabel">자동차세 + 교육세</span>
+                            <span id="annualTax">0원</span>
+                        </div>
+                        <div class="calculation-formula" id="annualTaxFormula"></div>
+                    </div>
+
+                    <!-- 총 지불 금액 -->
+                    <div class="result-item total">
+                        <span>총 지불 금액 (차량가격 + 취득세)</span>
+                        <span id="totalTax">0원</span>
+                    </div>
+
+                    <div id="hybridNotice" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+                    
+                    <button class="save-btn" onclick="saveVehicle()">차량 정보 저장</button>
+                </div>
+            </section>
+
+            <!-- 광고 영역 -->
+            <section class="ad-section">
+                <!-- 광고 단위 1: 상단 배너 -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </section>
+
+            <!-- 저장된 차량 목록 -->
+            <section class="saved-vehicles">
+                <h2>저장된 차량</h2>
+                <div id="vehicleList" class="vehicle-list">
+                    <!-- 저장된 차량들이 여기에 표시됩니다 -->
+                </div>
+            </section>
+
+            <!-- 광고 영역 2 -->
+            <section class="ad-section">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </section>
+
+            <!-- 세금 정보 -->
+            <section class="tax-info">
+                <h2>세금 정보</h2>
+                <div class="info-cards">
+                    <div class="info-card">
+                        <h3>개별소비세</h3>
+                        <p>순수 차량 가격의 5% (기본) / 3.5% (감면 적용시)</p>
+                        <ul>
+                            <li>배기량 1,000cc 이하: 비과세</li>
+                            <li>개별소비세 감면: 5% → 3.5%, 최대 100만원 (~25년 12월 31일)</li>
+                            <li>노후차량 감면: 개별소비세의 70% 감면, 최대 100만원</li>
+                            <li>경차: 면제 (~27년 12월 31일)</li>
+                            <li>전기차: 최대 300만원 감면 (~26년 12월 31일)</li>
+                            <li>수소전기차: 최대 400만원 감면 (~27년 12월 31일)</li>
+                            <li>하이브리드: 감면 없음</li>
+                            <li>장애인: 최대 500만원 면제</li>
+                            <li>※ 기준 가격에서 순수 가격을 계산하여 적용</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>취득세</h3>
+                        <p>과세표준의 2~7% (차량 형태별)</p>
+                        <ul>
+                            <li>경차: 1,875만원 이하 시 면제 (~27년 12월 31일)</li>
+                            <li>전기차: 최대 140만원 감면 (~26년 12월 31일)</li>
+                            <li>수소전기차: 최대 140만원 감면 (~27년 12월 31일)</li>
+                            <li>하이브리드: 최대 40만원 감면 (2024년 종료)</li>
+                            <li>노후차량: 최대 30만원 감면</li>
+                            <li>다자녀 2명: 최대 30만원 감면</li>
+                            <li>다자녀 3명: 최대 50만원 감면</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>등록세</h3>
+                        <p>과세표준의 5% (지방세)</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>자동차세</h3>
+                        <p>배기량에 따라 차등 부과 + 교육세 30%</p>
+                        <ul>
+                            <li>1,000cc 이하: 80원/cc</li>
+                            <li>1,600cc 이하: 140원/cc</li>
+                            <li>초과: 200원/cc</li>
+                            <li>전기차: 비영업용 10만원+3만원, 영업용 2만원+6천원 (정액)</li>
+                            <li>수소전기차: 비영업용 10만원+3만원, 영업용 2만원+6천원 (정액)</li>
+                            <li>교육세: 자동차세의 30% (일반차량) / 정액 (전기차·수소전기차)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 taxcalculatorkr.io. All rights reserved.</p>
+            <p>본 정보는 참고용이며, 실제 세금과 다를 수 있습니다.</p>
+        </div>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html> 
