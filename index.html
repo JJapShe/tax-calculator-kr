@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="styles/main.css">
     
     <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-            crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1746411002149198"
+     crossorigin="anonymous"></script>
 </head>
 <body>
     <header>
@@ -267,6 +267,89 @@
                     <div id="hybridNotice" style="margin-top: 1rem; font-size: 0.9rem;"></div>
                     
                     <button class="save-btn" onclick="saveVehicle()">차량 정보 저장</button>
+                </div>
+            </section>
+
+            <!-- 소득세 계산기 섹션 -->
+            <section class="calculator-section" id="income-calculator" style="display: none;">
+                <div class="calculator-card">
+                    <h2>💼 소득세 계산</h2>
+                    
+                    <!-- 소득 유형 선택 -->
+                    <div class="input-group">
+                        <label>소득 유형</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="incomeType" value="annual" checked>
+                                <span>연봉</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="incomeType" value="monthly">
+                                <span>월급</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 소득 입력 -->
+                    <div class="input-group">
+                        <label for="incomeAmount" id="incomeLabel">연봉 (세전)</label>
+                        <input type="number" id="incomeAmount" placeholder="소득을 입력하세요 (원)" min="0" step="10000">
+                        <small class="form-text">세전 소득을 입력해주세요. 연말정산은 제외됩니다.</small>
+                    </div>
+
+                    <button class="calculate-btn" onclick="calculateIncomeTax()">소득세 계산하기</button>
+                </div>
+
+                <!-- 소득세 결과 표시 -->
+                <div class="result-card" id="incomeResultCard" style="display: none;">
+                    <h3>소득세 계산 결과</h3>
+                    
+                    <!-- 기본 정보 -->
+                    <div class="result-section">
+                        <h4>기본 정보</h4>
+                        <div class="result-item">
+                            <span>총 소득</span>
+                            <span id="totalIncome">0원</span>
+                        </div>
+                        <div class="result-item">
+                            <span>과세표준</span>
+                            <span id="taxableIncome">0원</span>
+                        </div>
+                    </div>
+
+                    <!-- 소득세 계산 -->
+                    <div class="result-section">
+                        <h4>세액 계산</h4>
+                        <div class="result-item">
+                            <span>소득세 (국세)</span>
+                            <span id="nationalTax">0원</span>
+                        </div>
+                        <div class="result-item">
+                            <span>지방소득세 (10%)</span>
+                            <span id="localTax">0원</span>
+                        </div>
+                        <div class="result-item total">
+                            <span>총 세액</span>
+                            <span id="totalTax">0원</span>
+                        </div>
+                    </div>
+
+                    <!-- 실수령액 -->
+                    <div class="result-section">
+                        <h4>실수령액</h4>
+                        <div class="result-item">
+                            <span>연간 실수령액</span>
+                            <span id="annualNetIncome">0원</span>
+                        </div>
+                        <div class="result-item">
+                            <span>월간 실수령액</span>
+                            <span id="monthlyNetIncome">0원</span>
+                        </div>
+                        <div class="result-item">
+                            <span>실효세율</span>
+                            <span id="effectiveTaxRate">0%</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 

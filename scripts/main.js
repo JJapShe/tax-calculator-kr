@@ -1339,7 +1339,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    // 추가 초기화 로직이 필요하면 여기에 추가
+    // 소득세 계산기 초기화
+    initializeIncomeCalculator();
 });
 
 // 서비스 워커 등록 (PWA 지원)
@@ -1361,4 +1362,213 @@ if ('serviceWorker' in navigator) {
                 console.log('SW registration failed: ', registrationError);
             });
     });
+}
+
+// ================================
+// 소득세 계산기 관련 함수들
+// ================================
+
+/**
+ * 근로소득공제 계산
+ * @param {number} grossIncome - 총 급여액
+ * @returns {number} 근로소득공제액
+ */
+function calculateEmploymentDeduction(grossIncome) {
+    if (grossIncome <= 5000000) {
+        return grossIncome * 0.7;
+    } else if (grossIncome <= 15000000) {
+        return 3500000 + (grossIncome - 5000000) * 0.4;
+    } else if (grossIncome <= 45000000) {
+        return 7500000 + (grossIncome - 15000000) * 0.15;
+    } else if (grossIncome <= 100000000) {
+        return 12000000 + (grossIncome - 45000000) * 0.05;
+    } else {
+        return 14750000 + (grossIncome - 100000000) * 0.02;
+    }
+}
+
+/**
+ * 기본공제 계산 (단순화: 본인만 적용)
+ * @returns {number} 기본공제액
+ */
+function calculateBasicDeduction() {
+    return 1500000; // 본인 기본공제
+}
+
+/**
+ * 소득세 계산 (누진세율 적용)
+ * @param {number} taxableIncome - 과세표준
+ * @returns {object} 소득세와 누진공제 정보
+ */
+function calculateIncomeTaxWithProgressive(taxableIncome) {
+    const brackets = [
+        { min: 0, max: 14000000, rate: 0.06, deduction: 0 },
+        { min: 14000000, max: 50000000, rate: 0.15, deduction: 840000 },
+        { min: 50000000, max: 88000000, rate: 0.24, deduction: 6240000 },
+        { min: 88000000, max: 150000000, rate: 0.35, deduction: 15360000 },
+        { min: 150000000, max: 300000000, rate: 0.38, deduction: 37060000 },
+        { min: 300000000, max: 500000000, rate: 0.40, deduction: 94060000 },
+        { min: 500000000, max: 1000000000, rate: 0.42, deduction: 174060000 },
+        { min: 1000000000, max: Infinity, rate: 0.45, deduction: 384060000 }
+    ];
+
+    for (const bracket of brackets) {
+        if (taxableIncome > bracket.min && taxableIncome <= bracket.max) {
+            const incomeTax = Math.round(taxableIncome * bracket.rate - bracket.deduction);
+            return {
+                incomeTax: Math.max(0, incomeTax),
+                rate: bracket.rate,
+                deduction: bracket.deduction
+            };
+        }
+    }
+
+    return { incomeTax: 0, rate: 0, deduction: 0 };
+}
+
+/**
+ * 소득세 계산 메인 함수
+ */
+function calculateIncomeTax() {
+    const incomeType = document.querySelector('input[name="incomeType"]:checked').value;
+    const incomeAmount = parseFloat(document.getElementById('incomeAmount').value);
+
+    if (!incomeAmount || incomeAmount <= 0) {
+        alert('소득을 입력해주세요.');
+        return;
+    }
+
+    // 연간 소득으로 변환
+    const annualIncome = incomeType === 'monthly' ? incomeAmount * 12 : incomeAmount;
+
+    // 1. 근로소득공제 계산
+    const employmentDeduction = calculateEmploymentDeduction(annualIncome);
+    
+    // 2. 과세표준 계산 (총급여 - 근로소득공제 - 기본공제)
+    const basicDeduction = calculateBasicDeduction();
+    const taxableIncome = Math.max(0, annualIncome - employmentDeduction - basicDeduction);
+
+    // 3. 소득세 계산
+    const taxResult = calculateIncomeTaxWithProgressive(taxableIncome);
+    const incomeTax = taxResult.incomeTax;
+
+    // 4. 지방소득세 계산 (소득세의 10%)
+    const localTax = Math.round(incomeTax * 0.1);
+
+    // 5. 총 세액
+    const totalTax = incomeTax + localTax;
+
+    // 6. 실수령액 계산
+    const annualNetIncome = annualIncome - totalTax;
+    const monthlyNetIncome = Math.round(annualNetIncome / 12);
+
+    // 7. 실효세율 계산
+    const effectiveTaxRate = annualIncome > 0 ? (totalTax / annualIncome * 100) : 0;
+
+    // 결과 표시
+    displayIncomeResults({
+        totalIncome: annualIncome,
+        taxableIncome: taxableIncome,
+        incomeTax: incomeTax,
+        localTax: localTax,
+        totalTax: totalTax,
+        annualNetIncome: annualNetIncome,
+        monthlyNetIncome: monthlyNetIncome,
+        effectiveTaxRate: effectiveTaxRate
+    });
+}
+
+/**
+ * 소득세 계산 결과 표시
+ * @param {object} results - 계산 결과
+ */
+function displayIncomeResults(results) {
+    document.getElementById('totalIncome').textContent = formatNumber(results.totalIncome) + '원';
+    document.getElementById('taxableIncome').textContent = formatNumber(results.taxableIncome) + '원';
+    document.getElementById('nationalTax').textContent = formatNumber(results.incomeTax) + '원';
+    document.getElementById('localTax').textContent = formatNumber(results.localTax) + '원';
+    document.getElementById('totalTax').textContent = formatNumber(results.totalTax) + '원';
+    document.getElementById('annualNetIncome').textContent = formatNumber(results.annualNetIncome) + '원';
+    document.getElementById('monthlyNetIncome').textContent = formatNumber(results.monthlyNetIncome) + '원';
+    document.getElementById('effectiveTaxRate').textContent = results.effectiveTaxRate.toFixed(2) + '%';
+
+    // 결과 카드 표시
+    document.getElementById('incomeResultCard').style.display = 'block';
+}
+
+/**
+ * 소득 유형 변경 시 라벨 업데이트
+ */
+function updateIncomeLabel() {
+    const incomeType = document.querySelector('input[name="incomeType"]:checked').value;
+    const label = document.getElementById('incomeLabel');
+    const input = document.getElementById('incomeAmount');
+    
+    if (incomeType === 'annual') {
+        label.textContent = '연봉 (세전)';
+        input.placeholder = '연봉을 입력하세요 (원)';
+    } else {
+        label.textContent = '월급 (세전)';
+        input.placeholder = '월급을 입력하세요 (원)';
+    }
+}
+
+/**
+ * 네비게이션 관리
+ */
+function initializeNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const calculatorSections = document.querySelectorAll('.calculator-section');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            if (link.classList.contains('disabled')) {
+                return;
+            }
+
+            const calculatorType = link.getAttribute('data-calculator');
+            
+            // 모든 네비게이션 링크에서 active 클래스 제거
+            navLinks.forEach(l => l.classList.remove('active'));
+            
+            // 클릭된 링크에 active 클래스 추가
+            link.classList.add('active');
+            
+            // 모든 계산기 섹션 숨기기
+            calculatorSections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // 선택된 계산기 섹션 표시
+            if (calculatorType === 'car') {
+                document.querySelector('.calculator-section:not(#income-calculator)').style.display = 'block';
+            } else if (calculatorType === 'income') {
+                document.getElementById('income-calculator').style.display = 'block';
+            }
+        });
+    });
+}
+
+// 소득세 계산기 초기화 함수
+function initializeIncomeCalculator() {
+    // 소득세 계산기 관련 이벤트 리스너
+    const incomeTypeRadios = document.querySelectorAll('input[name="incomeType"]');
+    incomeTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updateIncomeLabel);
+    });
+
+    // 네비게이션 초기화
+    initializeNavigation();
+    
+    // 소득세 탭 활성화
+    const incomeNavLink = document.querySelector('[data-calculator="income"]');
+    if (incomeNavLink) {
+        incomeNavLink.classList.remove('disabled');
+        const comingSoon = incomeNavLink.querySelector('.coming-soon');
+        if (comingSoon) {
+            comingSoon.style.display = 'none';
+        }
+    }
 } 
